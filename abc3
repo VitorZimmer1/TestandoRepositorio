@@ -1,0 +1,151 @@
+package Steps;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import Massa_TK_Nexti_Time.MT_Perfil_Apuracao;
+import PO.PageObjectLogin;
+
+
+
+public class Step {
+	
+	PO.PageObjectLogin po = new PageObjectLogin();
+	Massa_TK_Nexti_Time.MT_Perfil_Apuracao mt = new MT_Perfil_Apuracao();
+	
+
+	public WebDriver abreChromeDriver(String tipoNavegador, String caminhoDoDriver, String url) {
+		
+		System.setProperty(tipoNavegador, caminhoDoDriver); 
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--remote-allow-origins=*");
+		//options.addArguments("--headless");
+		WebDriver driver = new ChromeDriver(options);
+		driver.navigate().to(url);
+        driver.manage().window().maximize();
+		
+		return driver;
+		
+	}
+	
+	
+	
+	public boolean login (WebDriver driver,String xpathCustomer,String xpathUser,String xpathPassword, String customer,String user,String password) {
+		
+		try {
+			
+			//Ambiente - Login - Senha
+			driver.findElement(By.id(xpathCustomer)).sendKeys((customer)+Keys.ENTER);
+	        Thread.sleep(5000);
+	        driver.findElement(By.id(xpathUser)).sendKeys(user);
+	        Thread.sleep(5000);
+	        driver.findElement(By.id(xpathPassword)).sendKeys(password+Keys.ENTER);
+	        Thread.sleep(5000);
+
+	        
+	        return true;
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			return false;}
+		}
+	
+	//-------------------------------------------------------------------------------------------------------
+		
+		public void acessandoSubMenu (WebDriver driver, String menu, String submenu) throws InterruptedException {
+
+	        try {
+
+	            driver.findElement(By.xpath(menu)).click();
+	            Thread.sleep(5000);
+	            driver.findElement(By.xpath(submenu)).click();
+	            Thread.sleep(5000);
+
+	        } catch (Exception e) {
+
+	            System.out.println(e.getMessage());
+
+	        }
+	     }
+		
+	//---------------------------------------------------------------------------------------------------------	
+		
+		public void inserindoInformacaoNoPerfilDeApuracao(WebDriver driver, String nomePerfil, String inicio_vigencia, String final_vigencia
+				) throws InterruptedException {
+		
+			
+			try	{
+			
+			driver.findElement(By.xpath(po.botaoNovoPerfilApuracaoGlobal())).click();
+			Thread.sleep(10000);
+			
+			driver.findElement(By.xpath(po.nomePerfilApuracao())).sendKeys(nomePerfil);
+			Thread.sleep(10000);
+			
+			driver.findElement(By.xpath(po.inicioDaSemana())).sendKeys(mt.mtListaInicioDaSemana());
+			Thread.sleep(5000);
+			
+			driver.findElement(By.xpath(po.Inicio_da_Vigencia())).clear();
+			Thread.sleep(2000);
+			
+			driver.findElement(By.xpath(po.Inicio_da_Vigencia())).sendKeys(inicio_vigencia + Keys.ENTER + Keys.TAB);
+			Thread.sleep(5000);
+			
+			
+			driver.findElement(By.xpath(po.Final_da_Vigencia())).sendKeys(final_vigencia + Keys.ENTER);
+			Thread.sleep(5000);
+			
+			
+		
+			
+			
+		}	catch (Exception e) {
+
+            System.out.println(e.getMessage());
+
+        } 
+			
+			
+
+		}
+		
+		public void abrePerfilApuracao(WebDriver driver, String nomePerfil) throws InterruptedException {
+			
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+			
+			WebElement filtro = driver.findElement(By.xpath(po.Filtro()));
+			wait.until(d -> filtro.isDisplayed());
+			filtro.sendKeys(nomePerfil + Keys.ENTER);
+			
+			Thread.sleep(10000);
+			
+			WebElement elementoPerfil = driver.findElement(By.xpath(po.elementoDaTabela()));
+			wait.until(d -> elementoPerfil.isDisplayed());
+			
+			elementoPerfil.click();
+			
+		}
+		
+		
+		public void deletePerfil(WebDriver driver)	{
+			
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+			
+			driver.findElement(By.xpath("/html/body/core-main/div/div[2]/div[3]/div/div[1]/div[1]/div[1]/div[2]/div[2]/div[1]")).click();
+			
+			
+			WebElement botaoConfirmaDelete = driver.findElement(By.xpath(po.confirmaDelete()));
+			wait.until(d -> botaoConfirmaDelete.isDisplayed());
+			botaoConfirmaDelete.click();
+			
+			
+		}
+		
+		
+}
