@@ -1,0 +1,391 @@
+package Testes_Regressivos_Nexti_Time;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.time.Duration;
+import java.util.Date;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+
+import Massa_TK_Nexti_Time.MT_Login;
+import Massa_TK_Nexti_Time.MT_Perfil_Apuracao;
+import PO.PageObjectLogin;
+import Steps.Step;
+import Utils.Funcoes;
+import junit.framework.Assert;
+
+public class Regressivo_Nexti_Time_Perfil_Apuracao {
+	
+	Steps.Step step = new Step();
+	PO.PageObjectLogin po = new PageObjectLogin();
+	Massa_TK_Nexti_Time.MT_Perfil_Apuracao mt = new MT_Perfil_Apuracao();
+	Funcoes funcao = new Funcoes();
+
+	
+	static WebDriver driver;
+	static WebDriverWait wait;
+	static String nomePerfilApuracao;
+	
+	@BeforeClass
+	public static void before() throws InterruptedException, IOException	{
+		
+		
+		Steps.Step step = new Step();
+		PO.PageObjectLogin po = new PageObjectLogin();
+		MT_Login MtLogin = new MT_Login();
+		MT_Perfil_Apuracao MtPerfilApuracao = new MT_Perfil_Apuracao();
+		Funcoes funcao = new Funcoes();
+		
+		nomePerfilApuracao = MtPerfilApuracao.mtNomePerfildeApuracao() + new Date().getTime();
+		driver = step.abreChromeDriver(po.tipoBrowser(), po.pathDriver(), MtLogin.mtLoginUrl());
+		wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+		
+		step.login(driver, po.idEmpresaLogin() , po.nameUser() , po.nameSenha() , MtLogin.mtLoginCustomer() , MtLogin.mtLoginUser() , MtLogin.mtLoginSenhaCorreta());
+		Thread.sleep(5000);
+		funcao.tiraPrint(driver, "./target/Evidencias/" + MtPerfilApuracao.acessandoContaDoCliente() + "01");
+		
+		WebElement sideBar = driver.findElement(By.xpath(po.menuLateralNextiTime()));
+		wait.until(d -> sideBar.isDisplayed());
+		
+		step.acessandoSubMenu(driver, po.menuLateralNextiTime(), po.submenuPerfilApuracao());
+		funcao.tiraPrint(driver, "./target/Evidencias/" + MtPerfilApuracao.acessandoSubMenu() + "02");
+	
+		wait.until(d -> d.findElement(By.xpath(po.botaoNovoPerfilApuracaoGlobal())).isDisplayed());
+		funcao.tiraPrint(driver, "./target/Evidencias/" + MtPerfilApuracao.criandoPerfilDeApuracaoGlobal() + "03");
+		
+		Thread.sleep(10000);
+		
+		step.inserindoInformacaoNoPerfilDeApuracao(driver, nomePerfilApuracao, MtPerfilApuracao.mtInicioDaVigencia(), MtPerfilApuracao.mtFinalDaVigencia());
+		funcao.tiraPrint(driver, "./target/Evidencias/" + MtPerfilApuracao.inserindoInformacaoNoPerfilDeApuracao() + "04");
+		
+		wait.until(d -> driver.findElement(By.xpath(po.botaoNovoPerfilApuracaoGlobal())).isDisplayed());
+		driver.findElement(By.xpath(po.Botao_Salvar_Perfil())).click();
+		funcao.tiraPrint(driver, "./target/Evidencias/" + MtPerfilApuracao.clicaBotaoNovoPerfilApuracao() + "05");
+		
+	}
+	
+	@AfterClass
+	public static void after()	throws InterruptedException, DocumentException, MalformedURLException, IOException	{
+		
+		Funcoes funcao = new Funcoes();
+		Massa_TK_Nexti_Time.MT_Perfil_Apuracao mt = new MT_Perfil_Apuracao();
+		
+		//Steps.Step step = new Step();
+	
+		//step.deletePerfil(driver);
+	
+		//driver.findElement(By.xpath(po.Botao_Salvar_Perfil())).click();
+		
+		//Criando estrutura do PDF
+		Document doc = funcao.CriaPdf("./target/PDF/" + mt.criandoPerfilDeApuracao() + ".pdf");
+		funcao.insereTituloNoPDF(doc, "Cenario: Criação de Perfil de Apuração");
+		funcao.insereTextoPDF(doc, "Data Criação: " + funcao.retornaData());
+		
+		Document doc2 = funcao.CriaPdf("./target/PDF/" + mt.acessandoContaDoCliente() + ".pdf");
+		funcao.insereTextoPDFSteps(doc2, "Step 1: Logando");
+		funcao.insereSubTituloPDF(doc2, "Login com sucesso ");
+		funcao.insereImagemPDF(doc2, "./target/Evidencias/" + mt.acessandoContaDoCliente() + "01.png");
+		
+		Document doc3 = funcao.CriaPdf("./target/PDF/" + mt.acessandoSubMenu() + ".pdf");
+		funcao.insereTextoPDFSteps(doc3, "Step 2: Acessando submenu");
+		funcao.insereSubTituloPDF(doc3, "Seleciona o submenu do NextiTime");
+		funcao.insereImagemPDF(doc3, "./target/Evidencias/" + mt.acessandoSubMenu() + "02.png");
+		
+		Document doc4 = funcao.CriaPdf("./target/PDF/" + mt.criandoPerfilDeApuracaoGlobal() + ".pdf");
+		funcao.insereTextoPDFSteps(doc4, "Step 3: Criando um novo Perfil de apuração Global");
+		funcao.insereSubTituloPDF(doc4, "Cria um novo Perfil de Apuração ");
+		funcao.insereImagemPDF(doc4, "./target/Evidencias/" + mt.criandoPerfilDeApuracaoGlobal() + "03.png");
+		
+		Document doc5 = funcao.CriaPdf("./target/PDF/" + mt.inserindoInformacaoNoPerfilDeApuracao() + ".pdf");
+		funcao.insereTextoPDFSteps(doc5, "Step 4: Inserindo as informações no Perfil de Apuração");
+		funcao.insereSubTituloPDF(doc5, "Preenche as informações obrigatórias para criar um Perfil de Apuração ");
+		funcao.insereImagemPDF(doc5, "./target/Evidencias/" + mt.inserindoInformacaoNoPerfilDeApuracao() + "04.png");
+		
+		Document doc6 = funcao.CriaPdf("./target/PDF/" + mt.clicaBotaoNovoPerfilApuracao() + ".pdf");
+		funcao.insereTextoPDFSteps(doc6, "Step 5: Clica no botão de salvar");
+		funcao.insereSubTituloPDF(doc6, "Clica no botão de salvar o perfil");
+		funcao.insereImagemPDF(doc6, "./target/Evidencias/" + mt.clicaBotaoNovoPerfilApuracao() + "05.png");
+		
+		Document doc7 = funcao.CriaPdf("./target/PDF/" + mt.criandoPerfilDeApuracao() + ".pdf");
+		funcao.insereTextoPDFSteps(doc7, "Step 6: Clica em cima do perfil criado");
+		funcao.insereSubTituloPDF(doc7, "Clica no nome selecionado e abre o perfil de apuração Global");
+		funcao.insereImagemPDF(doc7, "./target/Evidencias/" + mt.criandoPerfilDeApuracao() + "06.png");
+		
+		Document doc8 = funcao.CriaPdf("./target/PDF/" + mt.CT001_perfilApuracaoFlagConsiderarFeriados() + ".pdf");
+		funcao.insereTextoPDFSteps(doc8, "Step 7: Clica na flag 'Considerar Feriados'");
+		funcao.insereSubTituloPDF(doc8, "Ao habilitar esta flag, a apuração diferenciará os dias trabalhados em feriado, gerando os respectivos eventos de feriado "
+									+ "(Hora regular em feriado, Hora extra em feriado, Intra jornada, etc)");
+		funcao.insereImagemPDF(doc, "./target/Evidencias/" + mt.CT001_perfilApuracaoFlagConsiderarFeriados() + "07.png");
+		
+		Document doc9 = funcao.CriaPdf("./target/PDF/" + mt.CT002_FlagDesconsiderarFeriadoApenasSeNaoIniciaNoDiaDaJornada() + ".pdf");
+		funcao.insereTextoPDFSteps(doc9, "Step 8: Clica na flag 'Desconsiderar Feriado Apenas Se Não Inicia No Dia Da Jornada'");
+		funcao.insereSubTituloPDF(doc9, "Flag habilitada no perfil de apuração");
+		funcao.insereImagemPDF(doc9, "./target/Evidencias/" + mt.CT002_FlagDesconsiderarFeriadoApenasSeNaoIniciaNoDiaDaJornada() + "08.png");
+		
+		Document doc10 = funcao.CriaPdf("./target/PDF/" + mt.CT003_perfilApuracaoFlagConsiderarApenasCargaHorariaDiariaNaApuracao() + ".pdf");
+		funcao.insereTextoPDFSteps(doc10, "Step 9: Clica na flag 'Considerar Apenas Carga Horaria Diaria Na Apuração'");
+		funcao.insereSubTituloPDF(doc10, "Flag habilitada no perfil de apuração");
+		funcao.insereImagemPDF(doc10, "./target/Evidencias/" + mt.CT003_perfilApuracaoFlagConsiderarApenasCargaHorariaDiariaNaApuracao() + "09.png");
+		
+		Document doc11 = funcao.CriaPdf("./target/PDF/" + mt.CT004_perfilApuracaoFlagReduzirIntrajornadaDasHorasExtrasNoFeriado() + ".pdf");
+		funcao.insereTextoPDFSteps(doc11, "Step 10: Clica na flag 'Reduzir Intrajornada Das Horas Extras No Feriado'");
+		funcao.insereSubTituloPDF(doc11, "Flag habilitada no perfil de apuração");
+		funcao.insereImagemPDF(doc11, "./target/Evidencias/" + mt.CT004_perfilApuracaoFlagReduzirIntrajornadaDasHorasExtrasNoFeriado() + "10.png");
+		
+		Document doc12 = funcao.CriaPdf("./target/PDF/" + mt.CT005_perfilApuracaoFlagConsiderarCargaHorariaDiariaSemIntervalo() + ".pdf");
+		funcao.insereTextoPDFSteps(doc12, "Step 11: Clica na flag 'Considerar Carga Horaria Diaria Sem Intervalo'");
+		funcao.insereSubTituloPDF(doc12, "Flag habilitada no perfil de apuração");
+		funcao.insereImagemPDF(doc12, "./target/Evidencias/" + mt.CT005_perfilApuracaoFlagConsiderarCargaHorariaDiariaSemIntervalo() + "11.png");
+		
+		Document doc13 = funcao.CriaPdf("./target/PDF/" + mt.CT006_perfilApuracaoFlagDescontarHorasExtrasDasAusenciasJustificadasSeHouver() + ".pdf");
+		funcao.insereTextoPDFSteps(doc13, "Step 12: Clica na flag 'Perfil Apuracao Flag Descontar Horas Extras Das Ausencias Justificadas Se Houver'");
+		funcao.insereSubTituloPDF(doc13, "Flag habilitada no perfil de apuração");
+		funcao.insereImagemPDF(doc13, "./target/Evidencias/" + mt.CT006_perfilApuracaoFlagDescontarHorasExtrasDasAusenciasJustificadasSeHouver() + "12.png");
+		
+		Document doc14 = funcao.CriaPdf("./target/PDF/" + mt.CT007_perfilApuracaoIgnorarTolerancia() + ".pdf");
+		funcao.insereTextoPDFSteps(doc14, "Step 13: Clica na flag 'Perfil Apuracao Ignorar Tolerancia'");
+		funcao.insereSubTituloPDF(doc14, "Flag habilitada no perfil de apuração");
+		funcao.insereImagemPDF(doc14, "./target/Evidencias/" + mt.CT007_perfilApuracaoIgnorarTolerancia() + "13.png");
+		
+		Document doc15 = funcao.CriaPdf("./target/PDF/" + mt.CT008_perfilApuracaoContabilizarDomingoTrabalhado() + ".pdf");
+		funcao.insereTextoPDFSteps(doc15, "Step 14: Clica na flag 'Perfil Apuracao Contabilizar Domingo Trabalhado'");
+		funcao.insereSubTituloPDF(doc15, "Flag habilitada no perfil de apuração");
+		funcao.insereImagemPDF(doc13, "./target/Evidencias/" + mt.CT008_perfilApuracaoContabilizarDomingoTrabalhado() + "14.png");
+		
+		Document doc16 = funcao.CriaPdf("./target/PDF/" + mt.CT009_perfilApuracaoGerarEventoDeFolgaCompensada() + ".pdf");
+		funcao.insereTextoPDFSteps(doc16, "Step 15: Clica na flag 'Perfil Apuracao Contabilizar Domingo Trabalhado'");
+		funcao.insereSubTituloPDF(doc16, "Flag habilitada no perfil de apuração");
+		funcao.insereImagemPDF(doc16, "./target/Evidencias/" + mt.CT009_perfilApuracaoGerarEventoDeFolgaCompensada() + "15.png");
+		
+		
+		
+		
+		funcao.salvaPDF(doc);
+		
+		driver.close();
+		
+	}
+
+	
+	@Test
+	public void CT001_perfilApuracaoFlagConsiderarFeriados() throws IOException, InterruptedException	{	
+		
+		Funcoes funcao = new Funcoes();
+		MT_Perfil_Apuracao MtPerfilApuracao = new MT_Perfil_Apuracao();
+			
+			step.abrePerfilApuracao(driver, nomePerfilApuracao);
+			Thread.sleep(2000);
+			funcao.tiraPrint(driver, "./target/Evidencias/" + MtPerfilApuracao.criandoPerfilDeApuracao() + "06");
+			
+			Thread.sleep(5000);
+				
+			//Considerar feriados
+			WebElement flag = funcao.getFlag(driver, "newtimetrackingprofile.trackHoliday"); 
+			flag.click();
+			//Assert.assertTrue(flag.isSelected());
+			Thread.sleep(3000);
+			funcao.tiraPrint(driver, "./target/Evidencias/" + MtPerfilApuracao.CT001_perfilApuracaoFlagConsiderarFeriados() + "07");
+			Thread.sleep(2000);
+	}
+			
+			
+	@Test		
+	public void CT002_perfilApuracaoFlagDesconsiderarFeriadoApenasSeNaoIniciaNoDiaDaJornada() throws IOException, InterruptedException	{
+		
+		MT_Perfil_Apuracao mtPerfilApuracao = new MT_Perfil_Apuracao();
+		
+			Thread.sleep(3000);
+			//Desconsiderar feriado apenas se não inicia no dia da jornada
+			funcao.getFlag(driver, "newtimetrackingprofile.trackHolidayTomorrow").click();
+			Thread.sleep(2000);
+			funcao.tiraPrint(driver, "./target/Evidencias/" + mtPerfilApuracao.CT002_FlagDesconsiderarFeriadoApenasSeNaoIniciaNoDiaDaJornada() + "08");
+			Thread.sleep(2000);
+	}
+	
+	
+	@Test
+	public void CT003_perfilApuracaoFlagConsiderarApenasCargaHorariaDiariaNaApuracao() throws IOException, InterruptedException	{
+		
+		MT_Perfil_Apuracao mtPerfilApuracao = new MT_Perfil_Apuracao();
+		
+			Thread.sleep(2000);
+			//Considerar apenas Carga Horária Diária na Apuração
+			funcao.getFlag(driver, "newtimetrackingprofile.trackWorkload").click();
+			Thread.sleep(3000);
+			funcao.tiraPrint(driver, "./target/Evidencias/" + mtPerfilApuracao.CT003_perfilApuracaoFlagConsiderarApenasCargaHorariaDiariaNaApuracao() + "09");
+			Thread.sleep(2000);
+	
+	}
+	
+	
+	
+	@Test
+	public void CT004_perfilApuracaoFlagReduzirIntrajornadaDasHorasExtrasNoFeriado() throws IOException, InterruptedException	{
+		
+		MT_Perfil_Apuracao mtPerfilApuracao = new MT_Perfil_Apuracao();
+		
+			Thread.sleep(2000);
+			//Reduzir Intrajornada das horas extras no feriado
+			funcao.getFlag(driver, "newtimetrackingprofile.deductRestBetweenShiftsFromPaidOvertimeOnHoliday").click();
+			Thread.sleep(3000);
+			funcao.tiraPrint(driver, "./target/Evidencias/" + mtPerfilApuracao.CT004_perfilApuracaoFlagReduzirIntrajornadaDasHorasExtrasNoFeriado() + "10");
+			Thread.sleep(2000);
+	
+	}
+	
+	
+	@Test
+	public void CT005_perfilApuracaoFlagConsiderarCargaHorariaDiariaSemIntervalo() throws IOException, InterruptedException	{
+		
+		MT_Perfil_Apuracao mtPerfilApuracao = new MT_Perfil_Apuracao();
+		
+			Thread.sleep(3000);
+			//Considerar Carga Horária Diária sem intervalo
+			funcao.getFlag(driver, "newtimetrackingprofile.trackWorkloadDeductBreakGranted").click();
+			Thread.sleep(3000);
+			funcao.tiraPrint(driver, "./target/Evidencias/" + mtPerfilApuracao.CT005_perfilApuracaoFlagConsiderarCargaHorariaDiariaSemIntervalo() + "11");
+			Thread.sleep(3000);
+	}
+	
+	
+	@Test
+	public void CT006_perfilApuracaoFlagDescontarHorasExtrasDasAusenciasJustificadasSeHouver() throws IOException, InterruptedException	{
+			
+		MT_Perfil_Apuracao mtPerfilApuracao = new MT_Perfil_Apuracao();
+		
+		//Descontar horas extras das ausências justificadas, se houver
+			funcao.getFlag(driver, "newtimetrackingprofile.trackAbsencePaidOvertime").click();
+			Thread.sleep(3000);
+			funcao.tiraPrint(driver, "./target/Evidencias/" + mtPerfilApuracao.CT006_perfilApuracaoFlagDescontarHorasExtrasDasAusenciasJustificadasSeHouver() + "12");
+			Thread.sleep(3000);
+	}
+	
+	
+	@Test
+	public void CT007_perfilApuracaoIgnorarTolerancia() throws IOException, InterruptedException	{
+			
+		MT_Perfil_Apuracao mtPerfilApuracao = new MT_Perfil_Apuracao();
+		
+		//Ignorar tolerância
+			funcao.getFlag(driver, "newtimetrackingprofile.trackIgnoreTolerance").click();
+			Thread.sleep(3000);
+			funcao.tiraPrint(driver, "./target/Evidencias/" + mtPerfilApuracao.CT007_perfilApuracaoIgnorarTolerancia() + "13");
+			Thread.sleep(3000);
+			
+	
+	}
+	
+	
+	@Test
+	public void CT008_perfilApuracaoContabilizarDomingoTrabalhado() throws IOException, InterruptedException	{
+			
+		MT_Perfil_Apuracao mtPerfilApuracao = new MT_Perfil_Apuracao();
+		
+		//Contabilizar domingo trabalhado
+			funcao.getFlag(driver, "newtimetrackingprofile.countWorkedSundayEvent").click();
+			Thread.sleep(3000);
+			funcao.tiraPrint(driver, "./target/Evidencias/" + mtPerfilApuracao.CT008_perfilApuracaoContabilizarDomingoTrabalhado() + "14");
+			Thread.sleep(3000);
+	
+	}
+	
+	@Test
+	public void CT009_perfilApuracaoGerarEventoDeFolgaCompensada() throws IOException, InterruptedException	{
+			
+		MT_Perfil_Apuracao mtPerfilApuracao = new MT_Perfil_Apuracao();
+		
+		//Gerar evento de folga compensada
+			funcao.getFlag(driver, "newtimetrackingprofile.generateCompensatedDayOff").click();
+			Thread.sleep(3000);
+			funcao.tiraPrint(driver, "./target/Evidencias/" + mtPerfilApuracao.CT009_perfilApuracaoGerarEventoDeFolgaCompensada() + "15");
+			Thread.sleep(3000);
+	
+	}
+	
+	@Test
+	public void CT010_perfilApuracaoConsiderarFeriadosAteOFimDaJornada()	{
+			//Considerar feriados até o fim da jornada
+			funcao.getFlag(driver, "newtimetrackingprofile.trackHolidayClockingUsed").click();
+	
+	
+	}
+	
+	
+	@Test
+	public void CT011_perfilApuracaoDiferenciarAtrasos()	{
+			//Diferenciar atrasos
+			funcao.getFlag(driver, "newtimetrackingprofile.trackAbsenceDelay").click();
+	
+	}
+	
+	@Test
+	public void CT012_perfilApuracaoGerarAtrasoDiferenciadoDeIntervalo()	{
+			//Gerar atraso diferenciado de intervalo
+			funcao.getFlag(driver, "newtimetrackingprofile.differentiatedBreakDelay").click();
+	
+	}
+	
+	@Test
+	public void CT013_perfilApuracaoGerarInterjornada()	{
+			//Gerar interjornada
+			funcao.getFlag(driver, "newtimetrackingprofile.generateRestBetweenShifts").click();
+	
+	
+	}
+	
+	
+	@Test
+	public void CT014_perfilApuracaoGerarEventoDeMarcacaoImpar()	{
+			//Gerar evento de marcação ímpar
+			funcao.getFlag(driver, "newtimetrackingprofile.generateOddMarkupEvent").click();
+	
+	
+	}
+	
+	@Test
+	public void CT015_perfilApuracaoUtilizarCargaHorariaDiariaNaApuracao()	{
+			//Utilizar carga horária diária na apuração
+			funcao.getFlag(driver, "newtimetrackingprofile.useDailyWorkload").click();
+	
+	
+	}
+	
+	@Test
+	public void CT016_perfilApuracaoConverterEventosDeDebitoFaltaEmFalta()	{
+			//Converter eventos de "Débito Falta" em "Falta"
+			funcao.getFlag(driver, "newtimetrackingprofile.convertDebitInAbsence").click();
+	
+	}
+	
+	
+	
+	
+	
+	
+	//Gerar evento de ausência em folga
+			//funcao.getFlag(driver, "newtimetrackingprofile.absenceDayOff").click();
+		
+			
+			//Tolerância com base na CCT
+			//funcao.getFlag(driver, "newtimetrackingprofile.toleranceBasedOnCct").click();
+			
+			
+			//Gerar falta para escala flexível
+			//funcao.getFlag(driver, "newtimetrackingprofile.generateAbsenceForFlexibleShift").click();
+	
+	
+	
+		
+	}
